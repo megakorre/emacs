@@ -80,4 +80,7 @@
   (el-get-init)
   (package-initialize))
 
+(defun in-modes? (modes)
+  (-contains? modes major-mode))
+
 (provide 'util)

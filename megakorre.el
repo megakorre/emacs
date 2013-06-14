@@ -12,6 +12,7 @@
 
 (pending-delete-mode 1)
 (setq
+ nrepl-hide-special-buffers t
 
  make-backup-files           nil
  ido-enable-flex-matching    t
@@ -21,24 +22,23 @@
  mac-command-modifier        'meta
  x-select-enable-clipboard   t
 
+ lisp-modes '(clojure-mode emacs-lisp-mode lisp-mode Emacs-Lisp)
+ ruby-modes '(ruby-mode EnhRuby)
+
  inferior-lisp-program       "sbcl"
  ring-bell-function          #'ignore
  package-archives            '(("gnu" . "http://elpa.gnu.org/packages/")
 			       ("marmalade" . "http://marmalade-repo.org/packages/")
 			       ("melpa" . "http://melpa.milkbox.net/packages/")))
 
-(defun back-and-tab ()
-  (interactive)
-  (setq last-kbd-macro))
-
 (el-get-packages
  '(:name popup :type github :pkgname "auto-complete/popup-el")
  '(:name ido-ubiquitous :type elpa :after (ido-ubiquitous))
 
  '(:name Enhanced-Ruby-Mode
-               :type git
-               :url "git://github.com/Jell/Enhanced-Ruby-Mode.git"
-               :load "ruby-mode.el")
+	 :type git
+	 :url "git://github.com/Jell/Enhanced-Ruby-Mode.git"
+	 :load "ruby-mode.el")
 
  (github-package 'magit             "magit/magit")
  (github-package 'dash              "magnars/dash.el")
@@ -68,22 +68,19 @@
 (defun mode-change ()
   (smartparens-global-mode)
   (sp-use-paredit-bindings)
+  (auto-complete-mode)
   
-  (if (-contains? '(clojure-mode emacs-lisp-mode lisp-mode) major-mode)
+  (if (in-modes? lisp-modes)
       (progn
-	(setq nrepl-hide-special-buffers t)
-	(auto-complete)
-	(auto-complete)
-	(auto-complete-mode)
 	(paredit-mode)
 	(clojure-test-mode)
 	(smartparens-global-mode 0)))
-      
-  (if (-contains? '(ruby-mode EnhRuby) major-mode)
+
+  (if (in-modes? ruby-modes)
       (progn
-	(auto-complete)
-	(rspec-mode)
-	(auto-complete-mode))))
+	(rspec-mode))))
+
+(message (symbol-name major-mode))
 
 ;; keybindings
 (global-set-key (kbd "C-x C-l")		'sang-start-all)
