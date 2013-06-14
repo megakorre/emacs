@@ -1,7 +1,9 @@
 (display-time)
 (add-to-list 'load-path "~/.emacs.d/el-get/el-get")
 (add-to-list 'load-path "~/.emacs.d/")
+(defun ruby-mode-hook ())
 
+(add-hook 'after-change-major-mode-hook 'mode-change)
 ;; imports
 (require 'pk-theme)
 (require 'package)
@@ -22,21 +24,8 @@
  inferior-lisp-program       "sbcl"
  ring-bell-function          #'ignore
  package-archives            '(("gnu" . "http://elpa.gnu.org/packages/")
-		              ("marmalade" . "http://marmalade-repo.org/packages/")
-		              ("melpa" . "http://melpa.milkbox.net/packages/")))
-
-(defun save-macro (name)
-  "save a macro. Take a name as argument
-indent-regionnd save the last defined macro under
-     this name at the end of your .emacs"
-  (interactive "SName of the macro :")  ; ask for the name of the macro
-  (kmacro-name-last-macro name)         ; use this name for the macro
-  (find-file user-init-file)            ; open ~/.emacs or other user init file
-  (goto-char (point-max))               ; go to the end of the .emacs
-  (newline)                             ; insert a newline
-  (insert-kbd-macro name)               ; copy the macro
-  (newline)                             ; insert a newline
-  (switch-to-buffer nil))               ; return to the initial buffer
+			       ("marmalade" . "http://marmalade-repo.org/packages/")
+			       ("melpa" . "http://melpa.milkbox.net/packages/")))
 
 (defun back-and-tab ()
   (interactive)
@@ -47,9 +36,9 @@ indent-regionnd save the last defined macro under
  '(:name ido-ubiquitous :type elpa :after (ido-ubiquitous))
 
  '(:name Enhanced-Ruby-Mode
-	 :type github
-	 :pkgname "jacott/Enhanced-Ruby-Mode"
-	 :features ruby-mode)
+               :type git
+               :url "git://github.com/Jell/Enhanced-Ruby-Mode.git"
+               :load "ruby-mode.el")
 
  (github-package 'magit             "magit/magit")
  (github-package 'dash              "magnars/dash.el")
@@ -58,15 +47,15 @@ indent-regionnd save the last defined macro under
 
  (github-package 'puggle-utils      "PugglePay/puggle-emacs-utils")
  (github-package 'spork-and-nailgun "PugglePay/spork-and-nailgun.el")
- (github-package 'rspec-mode        "PugglePay/rspec-mode")
 
  (github-package 'yaml-mode         "yoshiki/yaml-mode")
  (github-package 'ace-jump-mode     "winterTTr/ace-jump-mode")
  (github-package 'multiple-cursors  "emacsmirror/multiple-cursors")
  (github-package 'expand-region     "magnars/expand-region.el")
-
+ (github-package 'smartparens       "Fuco1/smartparens")
 
  (melpa-package 'find-file-in-project)
+ (melpa-package 'rspec-mode)
  (melpa-package 'auto-complete)
  (melpa-package 'clojure-mode)
  (melpa-package 'paredit)
@@ -75,6 +64,26 @@ indent-regionnd save the last defined macro under
  (melpa-package 'clojure-test-mode)
  (melpa-package 'ack-and-a-half)
  (melpa-package 'rvm))
+
+(defun mode-change ()
+  (smartparens-global-mode)
+  (sp-use-paredit-bindings)
+  
+  (if (-contains? '(clojure-mode emacs-lisp-mode lisp-mode) major-mode)
+      (progn
+	(setq nrepl-hide-special-buffers t)
+	(auto-complete)
+	(auto-complete)
+	(auto-complete-mode)
+	(paredit-mode)
+	(clojure-test-mode)
+	(smartparens-global-mode 0)))
+      
+  (if (-contains? '(ruby-mode EnhRuby) major-mode)
+      (progn
+	(auto-complete)
+	(rspec-mode)
+	(auto-complete-mode))))
 
 ;; keybindings
 (global-set-key (kbd "C-x C-l")		'sang-start-all)
@@ -95,14 +104,6 @@ indent-regionnd save the last defined macro under
 (global-set-key (kbd "C-f") 'kill-whole-line)
 (global-set-key (kbd "C-*") 'ace-jump-word-mode)
 
-;; hooks
-(add-hook 'nrepl-interaction-mode-hook 'nrepl-turn-on-eldoc-mode)
-(add-hook 'ruby-mode-hook              'setup-ruby-stuff)
-(add-hook 'before-save-hook            'delete-trailing-whitespace)
-(add-hook 'clojure-mode-hook           'setup-lisp-stuff)
-(add-hook 'emacs-lisp-mode-hook        'setup-lisp-stuff)
-(add-hook 'lisp-mode-hook              'setup-lisp-stuff)
-
 (defalias 'yes-or-no-p 'y-or-n-p)
 
 ;; remove menue stuff
@@ -113,34 +114,12 @@ indent-regionnd save the last defined macro under
 (when (fboundp 'windmove-default-keybindings)
   (windmove-default-keybindings))
 
-;; stubb functions :)
-(defun hl-line-mode  (&rest varargs))
-;(defun inf-ruby-keys (&rest varargs))
-
-(defun setup-ruby-stuff ()
-  (auto-complete)
-  (rspec-mode)
-  (auto-complete-mode))
-
-(defvar tem-password "kevin.jalaho@bisfront.se")
-
-(defun setup-lisp-stuff ()
-  (setq nrepl-hide-special-buffers t)
-  (auto-complete)
-  (auto-complete)
-  (auto-complete-mode)
-  (paredit-mode)
-  (clojure-test-mode))
-
-(set-face-attribute 'default nil
-                    :height 150
-                    :weight 'normal)
-
 (defadvice rspec-compile (around rspec-compile-around)
   "Use BASH shell for running the specs because of ZSH issues."
   (let ((shell-file-name "/bin/bash")) ad-do-it))
 
 (ad-activate 'rspec-compile)
+(set-face-attribute 'default nil :height 150 :weight 'normal)
 
 (custom-set-variables
  ;; custom-set-variables was added by Custom.
@@ -160,13 +139,6 @@ indent-regionnd save the last defined macro under
  '(ruby-deep-indent-paren nil)
  '(ruby-extra-keywords (quote ("protected" "private")))
  '(ruby-hanging-indent-level 2))
-
-(custom-set-faces
- ;; custom-set-faces was added by Custom.
- ;; If you edit it by hand, you could mess it up, so be careful.
- ;; Your init file should contain only one such instance.
- ;; If there is more than one, they won't work right.
- )
 
 (setq backup-directory-alist         `((".*" . ,temporary-file-directory)))
 (setq auto-save-file-name-transforms `((".*" ,temporary-file-directory t)))
