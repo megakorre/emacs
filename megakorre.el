@@ -4,6 +4,7 @@
 (defun ruby-mode-hook ())
 
 (add-hook 'after-change-major-mode-hook 'mode-change)
+
 ;; imports
 (require 'pk-theme)
 (require 'package)
@@ -12,6 +13,7 @@
 
 (pending-delete-mode 1)
 (setq
+ 
  nrepl-hide-special-buffers t
 
  make-backup-files           nil
@@ -22,7 +24,11 @@
  mac-command-modifier        'meta
  x-select-enable-clipboard   t
 
- lisp-modes '(clojure-mode emacs-lisp-mode lisp-mode Emacs-Lisp)
+ lisp-modes '(clojure-mode 
+	      emacs-lisp-mode 
+	      lisp-mode 
+	      Emacs-Lisp)
+
  ruby-modes '(ruby-mode EnhRuby)
 
  inferior-lisp-program       "sbcl"
@@ -66,7 +72,7 @@
  (melpa-package 'rvm))
 
 (defun mode-change ()
-  (smartparens-global-mode)
+  (smartparens-mode 1)
   (sp-use-paredit-bindings)
   (auto-complete-mode)
   
@@ -74,15 +80,14 @@
       (progn
 	(paredit-mode)
 	(clojure-test-mode)
-	(smartparens-global-mode 0)))
+	(smartparens-mode 0)))
 
   (if (in-modes? ruby-modes)
       (progn
 	(rspec-mode))))
 
-(message (symbol-name major-mode))
-
 ;; keybindings
+(global-set-key (kbd "RET")             'newline-and-indent)
 (global-set-key (kbd "C-x C-l")		'sang-start-all)
 (global-set-key (kbd "C-x C-p")		'ack-and-a-half)
 (global-set-key (kbd "C-x C-s")		'force-save-buffer)
