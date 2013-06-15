@@ -11,7 +11,6 @@
 (require 'util)
 (progn (require 'ido) (ido-mode 1))
 
-(pending-delete-mode 1)
 (setq
  
  nrepl-hide-special-buffers t
@@ -26,7 +25,9 @@
 
  lisp-modes '(clojure-mode 
 	      emacs-lisp-mode 
-	      lisp-mode 
+	      inferior-emacs-lisp-mode
+	      lisp-mode
+	      IELM
 	      Emacs-Lisp)
 
  ruby-modes '(ruby-mode EnhRuby)
@@ -72,39 +73,35 @@
  (melpa-package 'rvm))
 
 (defun mode-change ()
+  (pending-delete-mode 1)
   (smartparens-mode 1)
   (sp-use-paredit-bindings)
   (auto-complete-mode)
-  
-  (if (in-modes? lisp-modes)
-      (progn
-	(paredit-mode)
-	(clojure-test-mode)
-	(smartparens-mode 0)))
 
-  (if (in-modes? ruby-modes)
-      (progn
-	(rspec-mode))))
+  (when (in-modes? lisp-modes)
+    (paredit-mode)
+    (clojure-test-mode)
+    (smartparens-mode 0))
 
-;; keybindings
-(global-set-key (kbd "RET")             'newline-and-indent)
-(global-set-key (kbd "C-x C-l")		'sang-start-all)
-(global-set-key (kbd "C-x C-p")		'ack-and-a-half)
-(global-set-key (kbd "C-x C-s")		'force-save-buffer)
-(global-set-key (kbd "C-x g")		'magit-status)
-(global-set-key [C-tab]			'nrepl-indent-and-complete-symbol)
-(global-set-key (kbd "C-x f")		'find-file-in-project)
-(global-set-key (kbd "C-S-c C-S-c")	'mc/edit-lines)
-(global-set-key (kbd "C-x C-i")		'esk-indent-buffer)
+  (when (in-modes? ruby-modes)
+    (rspec-mode)))
 
-(global-set-key (kbd "C-.")		'complete-symbol)
-(global-set-key (kbd "C-S-c C-S-c")	'mc/edit-lines)
-(global-set-key (kbd "C-:")		'mc/mark-next-like-this)
-(global-set-key (kbd "C-;")		'mc/mark-previous-like-this)
-
-(global-set-key (kbd "C-v") 'er/expand-region)
-(global-set-key (kbd "C-f") 'kill-whole-line)
-(global-set-key (kbd "C-*") 'ace-jump-word-mode)
+(global-set-keys
+ "RET"          'newline-and-indent
+ "C-x C-l"	'sang-start-all
+ "C-x C-p"	'ack-and-a-half
+ "C-x C-s"	'force-save-buffer
+ "C-x g"	'magit-status
+ "C-x f"	'find-file-in-project
+ "C-S-c C-S-c"	'mc/edit-lines
+ "C-x C-i"	'esk-indent-buffer
+ "C-."		'complete-symbol
+ "C-S-c C-S-c"	'mc/edit-lines
+ "C-:"		'mc/mark-next-like-this
+ "C-;"		'mc/mark-previous-like-this
+ "C-v"		'er/expand-region
+ "C-f"		'kill-whole-line
+ "C-t"		'ace-jump-word-mode)
 
 (defalias 'yes-or-no-p 'y-or-n-p)
 

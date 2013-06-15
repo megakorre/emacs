@@ -83,4 +83,8 @@
 (defun in-modes? (modes)
   (-contains? modes major-mode))
 
+(defun global-set-keys (&rest values)
+  (-> (-partition 2 values)
+    (--each (global-set-key (kbd (car it)) (car (cdr it))))))
+
 (provide 'util)
