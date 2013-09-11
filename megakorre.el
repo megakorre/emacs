@@ -3,17 +3,24 @@
 (add-to-list 'load-path "~/.emacs.d/")
 (defun ruby-mode-hook ())
 
-(add-hook 'after-change-major-mode-hook 'mode-change)
-
 ;; imports
 (require 'pk-theme)
 (require 'package)
 (require 'util)
 (progn (require 'ido) (ido-mode 1))
 
+(set-default 'cursor-type 'box)
 (setq
- 
+
  nrepl-hide-special-buffers t
+
+ puggle-projects
+ `((:name "emacs" :path "~/src/emacs")
+   (:name "puggle-emacs" :path "~/src/puggle/puggle-emacs-utils")
+   (:name "spork-and-nailgun" :path "~/src/puggle/spork-and-nailgun.el")
+   (:name "mantis"  :path "~/src/puggle/mantis")
+   (:name "boar"    :path "~/src/puggle/boar")
+   (:name "meerkat" :path "~/src/puggle/meerkat"))
 
  make-backup-files           nil
  ido-enable-flex-matching    t
@@ -23,8 +30,10 @@
  mac-command-modifier        'meta
  x-select-enable-clipboard   t
 
- lisp-modes '(clojure-mode 
-	      emacs-lisp-mode 
+ cursor-type 'bar
+
+ lisp-modes '(clojure-mode
+	      emacs-lisp-mode
 	      inferior-emacs-lisp-mode
 	      lisp-mode
 	      IELM
@@ -51,6 +60,7 @@
  (github-package 'dash              "magnars/dash.el")
  (github-package 'loop              "Wilfred/loop.el")
  (github-package 's                 "magnars/s.el")
+ (github-package 'zencoding-mode    "rooney/zencoding")
 
  (github-package 'puggle-utils      "PugglePay/puggle-emacs-utils")
  (github-package 'spork-and-nailgun "PugglePay/spork-and-nailgun.el")
@@ -60,9 +70,12 @@
  (github-package 'multiple-cursors  "emacsmirror/multiple-cursors")
  (github-package 'expand-region     "magnars/expand-region.el")
  (github-package 'smartparens       "Fuco1/smartparens")
+ (github-package 'elixir-mode       "elixir-lang/emacs-elixir")
+ (github-package 'rspec-mode        "pezra/rspec-mode")
+ (github-package 'grizzl            "d11wtq/grizzl")
+ (github-package 'fiplr             "d11wtq/fiplr")
 
  (melpa-package 'find-file-in-project)
- (melpa-package 'rspec-mode)
  (melpa-package 'auto-complete)
  (melpa-package 'clojure-mode)
  (melpa-package 'paredit)
@@ -72,11 +85,13 @@
  (melpa-package 'ack-and-a-half)
  (melpa-package 'rvm))
 
+(global-auto-complete-mode)
+(add-hook 'after-change-major-mode-hook 'mode-change)
 (defun mode-change ()
   (pending-delete-mode 1)
   (smartparens-mode 1)
   (sp-use-paredit-bindings)
-  (auto-complete-mode)
+  (show-paren-mode 1)
 
   (when (in-modes? lisp-modes)
     (paredit-mode)
@@ -86,13 +101,15 @@
   (when (in-modes? ruby-modes)
     (rspec-mode)))
 
+(global-set-key [f1] 'puggle-files-in-project)
 (global-set-keys
  "RET"          'newline-and-indent
  "C-x C-l"	'sang-start-all
  "C-x C-p"	'ack-and-a-half
  "C-x C-s"	'force-save-buffer
+ "C-x C-j"      'gnus
  "C-x g"	'magit-status
- "C-x f"	'find-file-in-project
+ "C-x f"	'fiplr-find-file
  "C-S-c C-S-c"	'mc/edit-lines
  "C-x C-i"	'esk-indent-buffer
  "C-."		'complete-symbol
@@ -103,12 +120,20 @@
  "C-f"		'kill-whole-line
  "C-t"		'ace-jump-word-mode)
 
+(global-set-key (kbd "C-c s") 'ispell)
+
+;; unbind for expand region to work
+;; while in multiple cursors mode
+(define-key mc/keymap (kbd "C-v") nil)
+
+(add-hook 'before-save-hook 'delete-trailing-whitespace)
+
 (defalias 'yes-or-no-p 'y-or-n-p)
 
-;; remove menue stuff
+;; remove menu stuff
 (when (fboundp 'menu-bar-mode)   (menu-bar-mode -1))
 (when (fboundp 'tool-bar-mode)   (tool-bar-mode -1))
-(when (fboundp 'scroll-bar-mode) (scroll-bar-mode -1))
+x(when (fboundp 'scroll-bar-mode) (scroll-bar-mode -1))
 
 (when (fboundp 'windmove-default-keybindings)
   (windmove-default-keybindings))
@@ -118,7 +143,7 @@
   (let ((shell-file-name "/bin/bash")) ad-do-it))
 
 (ad-activate 'rspec-compile)
-(set-face-attribute 'default nil :height 150 :weight 'normal)
+(set-face-attribute 'default nil :height 130 :weight 'normal)
 
 (custom-set-variables
  ;; custom-set-variables was added by Custom.
