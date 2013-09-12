@@ -133,7 +133,7 @@
 ;; remove menu stuff
 (when (fboundp 'menu-bar-mode)   (menu-bar-mode -1))
 (when (fboundp 'tool-bar-mode)   (tool-bar-mode -1))
-x(when (fboundp 'scroll-bar-mode) (scroll-bar-mode -1))
+(when (fboundp 'scroll-bar-mode) (scroll-bar-mode -1))
 
 (when (fboundp 'windmove-default-keybindings)
   (windmove-default-keybindings))

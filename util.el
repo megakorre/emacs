@@ -112,9 +112,6 @@
    plist-b))
 
 (defun m/p (&rest args)
-  (assert (evenp (length args))
-	  nil
-	  "Plist has to have a even number of arguments")
   args)
 
 (defun m/dissoc (plist key)
@@ -122,11 +119,9 @@
    (--reject (eq (first it) key) (-partition 2 plist))))
 
 (defun m/assoc (plist &rest pairs)
-  (assert (evenp (length pairs)) nil "plist requiers even numbers of args")
   (m/merge plist pairs))
 
 (defun m/update-in (plist index f &rest args)
-  (assert (< 0 (length index)) nil "index has to be present")
   (let ((key (first index)))
     (if (eq 1 (length index))
 	(m/assoc plist key (apply f (m/get plist key) args))
@@ -162,11 +157,11 @@
 
 (defun m/key-lookup-pair (keys map-name)
   (-map
-   (lambda (key) `(,key (m/get ,map-name ,(m/symbol->keyword key))))
+   (lambda (key)
+     `(,key (m/get ,map-name ,(m/symbol->keyword key))))
    keys))
 
 (defmacro m/letm (form &rest code)
-  (assert (evenp (length form)))
   (let* ((map (gensym))
 	 (keys (first form))
 	 (val-exp (second form))
@@ -178,11 +173,5 @@
     `(let* ((,map ,val-exp)
 	    .,(m/key-lookup-pair keys map))
        ,next-code)))
-
-(assert
- (eq (m/letm ((a b c) (list :a 1 :b 2 :c 3)
-	      (d e)   (list :d 5 :e 2))
-	     (+ a b c d e))
-     13))
 
 (provide 'util)
