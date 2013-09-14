@@ -10,6 +10,7 @@
 
 (global-auto-complete-mode)
 (add-hook 'after-change-major-mode-hook 'mode-change)
+
 (defun mode-change ()
   (pending-delete-mode 1)
   (smartparens-mode 1)

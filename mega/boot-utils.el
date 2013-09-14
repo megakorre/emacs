@@ -1,5 +1,3 @@
-
-
 (defun github-package (name package)
   `(:name ,name
           :type github
