@@ -4,6 +4,7 @@
  x-select-enable-clipboard t)
 
 (mega/keys
+
  (:tap "ww" m-indent-buffer)
  (:tap "xx" ace-jump-word-mode)
  (:tap "åå" kill-whole-line)
@@ -12,6 +13,7 @@
  (:tap "äc" rspec-verify-continue)
  (:tap "äs" kill-whole-line)
  (:tap "ät" rspec-toggle-spec-and-target)
+
  ("C-x C-l" sang-start-all)
  ("C-x C-p" ack-and-a-half)
  ("C-x C-s" force-save-buffer)
@@ -21,9 +23,14 @@
  ("C-S-c C-S-c" mc/edit-lines)
  ("C-x C-i" esk-indent-buffer)
  ("C-." complete-symbol)
+
+ ("RET" newline-and-indent)
+
  ("C-S-c C-S-c" mc/edit-lines)
  ("C-:" mc/mark-next-like-this)
  ("C-;" mc/mark-previous-like-this)
+ (mc/keymap "C-v" nil)
+
  ("C-v" er/expand-region)
  ("C-f" kill-whole-line)
  ("C-t" ace-jump-word-mode)

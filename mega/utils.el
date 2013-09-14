@@ -206,6 +206,10 @@
 	 ((eq (first it) :tap)
 	  `(key-chord-define-global ,(second it) (quote ,(third it))))
 
+	 ;; keymap
+	 ((symbolp (first it))
+	  `(define-key ,(first it) (kbd ,(second it)) (quote ,(third it))))
+
 	 ;; kbd
 	 ((stringp (first it))
 	  `(global-set-key (kbd ,(first it)) (quote ,(second it))))
