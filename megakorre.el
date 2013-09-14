@@ -7,11 +7,11 @@
 (require 'pk-theme)
 (require 'package)
 (require 'util)
+(require 'pivotol)
 (progn (require 'ido) (ido-mode 1))
 
 (set-default 'cursor-type 'box)
 (setq
-
  nrepl-hide-special-buffers t
 
  puggle-projects
@@ -75,6 +75,7 @@
  (github-package 'grizzl            "d11wtq/grizzl")
  (github-package 'fiplr             "d11wtq/fiplr")
 
+ (melpa-package 'key-chord)
  (melpa-package 'find-file-in-project)
  (melpa-package 'auto-complete)
  (melpa-package 'clojure-mode)
@@ -101,6 +102,19 @@
   (when (in-modes? ruby-modes)
     (rspec-mode)))
 
+(require 'key-chord)
+(key-chord-mode 1)
+
+(key-chord-define-global "qq" 'm-indent-buffer)
+(key-chord-define-global "xx" 'ace-jump-word-mode)
+(key-chord-define-global "åå" 'kill-whole-line)
+
+(key-chord-define-global "äa" 'rspec-verify-all)
+(key-chord-define-global "äv" 'rspec-verify)
+(key-chord-define-global "äc" 'rspec-verify-continue)
+(key-chord-define-global "äs" 'kill-whole-line)
+(key-chord-define-global "ät" 'rspec-toggle-spec-and-target)
+
 (global-set-key [f1] 'puggle-files-in-project)
 (global-set-keys
  "RET"          'newline-and-indent
@@ -118,9 +132,25 @@
  "C-;"		'mc/mark-previous-like-this
  "C-v"		'er/expand-region
  "C-f"		'kill-whole-line
- "C-t"		'ace-jump-word-mode)
+
+ "C-t"		'ace-jump-word-mode
+
+ "C-l"          'insert-and-indent-before
+ "C-ö"          'insert-and-indent-after
+ "C-ä"          'pivotal-make-ref
+
+ "C-a"          'move-to-begining-of-code
+ "C-b"          'ido-switch-buffer
+
+ "C-1"          'delete-other-windows
+ "C-0"          'delete-window)
 
 (global-set-key (kbd "C-c s") 'ispell)
+
+(add-to-list 'auto-mode-alist '("\\Gemfile\\'" .  ruby-mode))
+(add-to-list 'auto-mode-alist '("\\.erb\\'" .     ruby-mode))
+(add-to-list 'auto-mode-alist '("\\.builder\\'" . ruby-mode))
+(add-to-list 'auto-mode-alist '("\\.html\\'" . web-mode))
 
 ;; unbind for expand region to work
 ;; while in multiple cursors mode

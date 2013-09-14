@@ -11,7 +11,7 @@
 
 (defconst ruby-indent-beg-re
   "\\(\\s *\\(class\\|module\\|def\\)\\)\\|if\\|unless\\|case\\|while\\|until\\|for\\|begin"
-    )
+  )
 
 (defconst ruby-modifier-beg-re
   "if\\|unless\\|while\\|until"
@@ -85,7 +85,42 @@
   (-> (-partition 2 values)
     (--each (global-set-key (kbd (car it)) (car (cdr it))))))
 
+(defun move-to-begining-of-code ()
+  (interactive)
+  (move-beginning-of-line 1)
+  (indent-according-to-mode))
+
+(defun insert-and-indent-after ()
+  (interactive)
+  (message "inserting line after")
+  (move-end-of-line 1)
+  (newline)
+  (indent-according-to-mode))
+
+(defun insert-and-indent-before ()
+  (interactive)
+  (message "inserting line before")
+  (previous-line)
+  (move-end-of-line 1)
+  (newline)
+  (indent-according-to-mode))
+
+(defun m-indent-buffer ()
+  (interactive)
+  (message "indenting all buffer")
+  (puggle-indent-buffer))
+
 ;; -------------------------------------------------------------------------------------
+
+(defun slurp (path)
+  (with-temp-buffer
+    (insert-file-contents path)
+    (buffer-string)))
+
+(defun alist->plist (alist)
+  (-flatten (--map
+	     (list (m/symbol->keyword (car it)) (cdr it))
+	     alist)))
 
 (defun m/keys (plist)
   (->> plist
@@ -162,6 +197,8 @@
    keys))
 
 (defmacro m/letm (form &rest code)
+  ""
+  (declare (indent defun))
   (let* ((map (gensym))
 	 (keys (first form))
 	 (val-exp (second form))
@@ -173,5 +210,33 @@
     `(let* ((,map ,val-exp)
 	    .,(m/key-lookup-pair keys map))
        ,next-code)))
+
+(defvar m/keywords-added nil)
+(unless m/keywords-added
+  (font-lock-add-keywords
+   'emacs-lisp-mode
+   `((,(concat "(\\s-*" (regexp-opt '("m/letm" "m/defm" "m/defk") 'paren) "\\>")
+      1 font-lock-keyword-face)) 'append)
+
+  (font-lock-refresh-defaults)
+  (setq m/keywords-added t))
+
+(defmacro m/defm
+  (name bindings &rest code)
+  ""
+  (declare (indent defun))
+  (let ((map-arg (gensym)))
+    `(defun ,name (,map-arg)
+       (m/letm (,bindings ,map-arg)
+	 .,code))))
+
+(defmacro m/defk
+  (name bindings &rest code)
+  ""
+  (declare (indent defun))
+  (let ((map-arg (gensym)))
+    `(defun ,name (&rest ,map-arg)
+       (m/letm (,bindings ,map-arg)
+	 .,code))))
 
 (provide 'util)
