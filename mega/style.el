@@ -75,4 +75,3 @@
  '(default ((((class color) (min-colors 89)) (:foreground "#ffffff" :background "#181818")))))
 
 (provide-theme 'pk)
-(provide 'pk-theme)

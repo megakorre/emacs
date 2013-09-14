@@ -2,6 +2,7 @@
 
 (defun pivotal-project ()
   (string-to-int (slurp "~/.pivotal-project")))
+
 (defun pivotal-api-key ()
   (slurp "~/.pivotolapi"))
 
