@@ -1,7 +1,6 @@
 (defalias 'first 'car)
 (defalias 'rest  'cdr)
 
-
 (defun force-save-buffer ()
   "Save the buffer even if it is not modified."
   (interactive)
@@ -193,3 +192,25 @@
     `(defun ,name (&rest ,map-arg)
        (m/letm (,bindings ,map-arg)
 	 .,code))))
+
+;; ---------------------------------------------------------------------------------
+
+(require 'key-chord)
+(key-chord-mode 1)
+
+(defmacro mega/keys (&rest args)
+  `(progn
+     .,(--map
+	(cond
+	 ;; key-chord
+	 ((eq (first it) :tap)
+	  `(key-chord-define-global ,(second it) (quote ,(third it))))
+
+	 ;; kbd
+	 ((stringp (first it))
+	  `(global-set-key (kbd ,(first it)) (quote ,(second it))))
+
+	 ;; raw
+	 (t
+	  `(global-set-key ,(first it) (quote ,(second it)))))
+	args)))
