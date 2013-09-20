@@ -12,5 +12,3 @@
 (load "mega/keybindings")
 (load "mega/etc")
 (load "mega/hooks")
-
-(require 'pivotol)

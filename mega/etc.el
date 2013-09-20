@@ -17,6 +17,15 @@
 (when (fboundp 'windmove-default-keybindings)
   (windmove-default-keybindings))
 
+(add-to-list 'auto-mode-alist '("\\.erb$"  . ruby-mode))
+(add-to-list 'auto-mode-alist '("\\.html$" . web-mode))
+(add-to-list 'auto-mode-alist '("\\.builder$" . ruby-mode))
+(add-to-list 'auto-mode-alist '("\\Gemfile" . ruby-mode))
+(add-to-list 'auto-mode-alist '("\\.md" . markdown-mode))
+(add-to-list 'auto-mode-alist '("\\.gemspec" . ruby-mode))
+(add-to-list 'auto-mode-alist '("\\Rakefile" . ruby-mode))
+
+
 (set-face-attribute 'default nil :height 130 :weight 'normal)
 
 (custom-set-variables

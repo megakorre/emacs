@@ -4,16 +4,16 @@
  x-select-enable-clipboard t)
 
 (mega/keys
-
- (:tap "ww" m-indent-buffer)
+ (:tap "qq" m-indent-buffer)
  (:tap "xx" ace-jump-word-mode)
  (:tap "åå" kill-whole-line)
  (:tap "äa" rspec-verify-all)
- (:tap "äv" rspec-verify)
+ (:tap "äv" rspexc-verify)
  (:tap "äc" rspec-verify-continue)
  (:tap "äs" kill-whole-line)
  (:tap "ät" rspec-toggle-spec-and-target)
 
+ ("C--" evil-join)
  ("C-x C-l" sang-start-all)
  ("C-x C-p" ack-and-a-half)
  ("C-x C-s" force-save-buffer)
@@ -36,7 +36,10 @@
  ("C-t" ace-jump-word-mode)
  ("C-l" insert-and-indent-before)
  ("C-ö" insert-and-indent-after)
+
+ (git-commit-mode-map "C-x i" pivotal-make-ref)
  ("C-ä" pivotal-make-ref)
+
  ("C-a" move-to-begining-of-code)
  ("C-b" ido-switch-buffer)
  ("C-1" delete-other-windows)

@@ -37,7 +37,6 @@
   "and\\|or\\|not"
   )
 
-
 (defconst ruby-block-hanging-re
   (concat ruby-modifier-beg-re "\\|" ruby-block-op-re)
   )

@@ -1,5 +1,5 @@
 (setq
-  lisp-modes '(clojure-mode
+ lisp-modes '(clojure-mode
 	      emacs-lisp-mode
 	      inferior-emacs-lisp-mode
 	      lisp-mode

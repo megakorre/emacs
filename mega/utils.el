@@ -1,5 +1,8 @@
+;;
 (defalias 'first 'car)
 (defalias 'rest  'cdr)
+
+(require 'ob-clojure)
 
 (defun force-save-buffer ()
   "Save the buffer even if it is not modified."
@@ -35,10 +38,6 @@
 (defun in-modes? (modes)
   (-contains? modes major-mode))
 
-(defun global-set-keys (&rest values)
-  (-> (-partition 2 values)
-    (--each (global-set-key (kbd (car it)) (car (cdr it))))))
-
 (defun move-to-begining-of-code ()
   (interactive)
   (move-beginning-of-line 1)
@@ -64,157 +63,49 @@
   (message "indenting all buffer")
   (puggle-indent-buffer))
 
-;; -------------------------------------------------------------------------------------
+(defun evil-join ()
+  (interactive)
+  (delete-indentation -1))
 
 (defun slurp (path)
   (with-temp-buffer
     (insert-file-contents path)
     (buffer-string)))
 
-(defun alist->plist (alist)
-  (-flatten (--map
-	     (list (m/symbol->keyword (car it)) (cdr it))
-	     alist)))
+(defun iterate (f x)
+  (let ((n (funcall f x)))
+    (if n (cons x (iterate f n)))))
 
-(defun m/keys (plist)
-  (->> plist
-    (-partition 2)
-    (-map 'first)))
-
-(defun m/vals (plist)
-  (->> plist
-    (-partition 2)
-    (-map 'second)))
-
-(defalias 'm/get 'plist-get)
-
-(defun m/merge (plist-a &rest plist-b)
-  (-reduce-from
-   (lambda (plist-a plist-b)
-     (->> (-partition 2 plist-b)
-       (--reduce-from
-	(let ((key (first it))
-	      (val (second it)))
-	  (plist-put acc key val))
-	plist-a)))
-   plist-a
-   plist-b))
-
-(defun m/p (&rest args)
-  args)
-
-(defun m/dissoc (plist key)
-  (-flatten
-   (--reject (eq (first it) key) (-partition 2 plist))))
-
-(defun m/assoc (plist &rest pairs)
-  (m/merge plist pairs))
-
-(defun m/update-in (plist index f &rest args)
-  (let ((key (first index)))
-    (if (eq 1 (length index))
-	(m/assoc plist key (apply f (m/get plist key) args))
-      (m/assoc plist key (apply 'm/update-in (m/get plist key) (rest index) f args)))))
-
-(defun m/merge-with (f plist-a plist-b)
-  (-reduce-from
-   (lambda (accu input-pair)
-     (let* ((key (first input-pair))
-	    (old-val (plist-get accu key))
-	    (new-val
-	     (if old-val
-		 (funcall f old-val (second input-pair))
-	       (second input-pair))))
-       (plist-put accu key new-val)))
-   plist-a
-   (-partition 2 plist-b)))
-
-(defun m/assoc-in (plist index &rest keyvals)
-  (m/update-in plist index 'm/merge keyvals))
-
-(defun m/map-vals (f plist)
-  (->> (-partition 2 plist)
-    (-map (lambda (pair)
-	    (list (first pair) (funcall f (second pair)))))
-    (-flatten)))
-
-(defun m/keyword->symbol (keyword)
-  (intern (substring (symbol-name keyword) 1)))
-
-(defun m/symbol->keyword (symbol)
-  (intern (concat ":" (symbol-name symbol))))
-
-(defun m/key-lookup-pair (keys map-name)
-  (-map
-   (lambda (key)
-     `(,key (m/get ,map-name ,(m/symbol->keyword key))))
-   keys))
-
-(defmacro m/letm (form &rest code)
-  ""
-  (declare (indent defun))
-  (let* ((map (gensym))
-	 (keys (first form))
-	 (val-exp (second form))
-	 (remaining (rest (rest form)))
-	 (next-code
-	  (if (null remaining)
-	      `(progn .,code)
-	    `(m/letm ,remaining .,code))))
-    `(let* ((,map ,val-exp)
-	    .,(m/key-lookup-pair keys map))
-       ,next-code)))
-
-(defvar m/keywords-added nil)
-(unless m/keywords-added
-  (font-lock-add-keywords
-   'emacs-lisp-mode
-   `((,(concat "(\\s-*" (regexp-opt '("m/letm" "m/defm" "m/defk") 'paren) "\\>")
-      1 font-lock-keyword-face)) 'append)
-
-  (font-lock-refresh-defaults)
-  (setq m/keywords-added t))
-
-(defmacro m/defm
-  (name bindings &rest code)
-  ""
-  (declare (indent defun))
-  (let ((map-arg (gensym)))
-    `(defun ,name (,map-arg)
-       (m/letm (,bindings ,map-arg)
-	 .,code))))
-
-(defmacro m/defk
-  (name bindings &rest code)
-  ""
-  (declare (indent defun))
-  (let ((map-arg (gensym)))
-    `(defun ,name (&rest ,map-arg)
-       (m/letm (,bindings ,map-arg)
-	 .,code))))
-
-;; ---------------------------------------------------------------------------------
+(defun range (start &optional end)
+  (let ((start (if end start 0))
+	(end   (if end end start)))
+    (iterate
+     (lambda (n)
+       (if (eq n end) nil (1+ n)))
+     start)))
 
 (require 'key-chord)
 (key-chord-mode 1)
 
+(require 'dash-functional)
+
+(defun mega/dispatch-key (expression)
+  (cond
+   ;; key-chord
+   ((eq (first expression) :tap)
+    `(key-chord-define-global ,(second expression) (quote ,(third expression))))
+
+   ;; keymap
+   ((symbolp (first expression))
+    `(define-key ,(first expression) (kbd ,(second expression)) (quote ,(third expression))))
+
+   ;; kbd
+   ((stringp (first expression))
+    `(global-set-key (kbd ,(first expression)) (quote ,(second expression))))
+
+   ;; raw
+   (t
+    `(global-set-key ,(first expression) (quote ,(second expression))))))
+
 (defmacro mega/keys (&rest args)
-  `(progn
-     .,(--map
-	(cond
-	 ;; key-chord
-	 ((eq (first it) :tap)
-	  `(key-chord-define-global ,(second it) (quote ,(third it))))
-
-	 ;; keymap
-	 ((symbolp (first it))
-	  `(define-key ,(first it) (kbd ,(second it)) (quote ,(third it))))
-
-	 ;; kbd
-	 ((stringp (first it))
-	  `(global-set-key (kbd ,(first it)) (quote ,(second it))))
-
-	 ;; raw
-	 (t
-	  `(global-set-key ,(first it) (quote ,(second it)))))
-	args)))
+  (cons 'progn (-map 'mega/dispatch-key args)))
