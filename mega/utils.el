@@ -2,7 +2,6 @@
 (defalias 'first 'car)
 (defalias 'rest  'cdr)
 
-(require 'ob-clojure)
 
 (defun force-save-buffer ()
   "Save the buffer even if it is not modified."
@@ -83,6 +82,27 @@
      (lambda (n)
        (if (eq n end) nil (1+ n)))
      start)))
+
+(defun scan (f col &optional seed)
+  (cond
+   ((not col)
+    (list seed))
+   ((not seed)
+    (scan f (cdr col) (car col)))
+   (t (cons seed
+	    (scan f (cdr col) (funcall f seed (car col)))))))
+
+(defun combinations (l n)
+  (cond
+   ((eq n 0) nil)
+   ((eq n 1) (-map 'list l))
+   (t (-mapcat
+       (lambda (item)
+	 (-map (lambda (s) (cons item s))
+	       (combinations (remove item l) (- n 1))))
+       l))))
+
+
 
 (require 'key-chord)
 (key-chord-mode 1)
