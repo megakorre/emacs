@@ -1,7 +1,7 @@
 (defun github-package (name package)
   (list :name name
 	:type 'github
-	:pkgname ,package
+	:pkgname package
 	:after `(progn
 		  (require (quote ,name)))))
 

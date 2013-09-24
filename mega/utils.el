@@ -93,16 +93,14 @@
 	    (scan f (cdr col) (funcall f seed (car col)))))))
 
 (defun combinations (l n)
-  (cond
-   ((eq n 0) nil)
-   ((eq n 1) (-map 'list l))
-   (t (-mapcat
-       (lambda (item)
-	 (-map (lambda (s) (cons item s))
-	       (combinations (remove item l) (- n 1))))
-       l))))
-
-
+  (case n
+    (0 nil)
+    (1 (-map 'list l))
+    (t (-mapcat
+	(lambda (item)
+	  (-map (lambda (s) (cons item s))
+		(combinations (remove item l) (- n 1))))
+	l))))
 
 (require 'key-chord)
 (key-chord-mode 1)
